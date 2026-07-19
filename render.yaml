@@ -1,7 +1,7 @@
 databases:
-  - name: mysitedb
+  - name: smart_learning_assistant
     plan: free
-    databaseName: mysite
+    databaseName: smart_learning_assistant
     user: mysite
 
 services:
@@ -10,7 +10,7 @@ services:
     name: mysite
     runtime: python
     buildCommand: './build.sh'
-    startCommand: 'python -m gunicorn mysite.asgi:application -k uvicorn.workers.UvicornWorker'
+    startCommand: 'python -m gunicorn smart_learning_assistant.asgi:application -k uvicorn.workers.UvicornWorker'
     envVars:
       - key: DATABASE_URL
         fromDatabase:
