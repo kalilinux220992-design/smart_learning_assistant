@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube to PDF Converter</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        .converter-card {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+        .converter-banner {
+            margin-bottom: 18px;
+        }
+        .converter-banner h2 {
+            margin: 0 0 8px;
+            font-size: 1.7rem;
+        }
+        .converter-banner p {
+            margin: 0;
+            color: var(--muted);
+        }
+        .converter-form {
+            display: grid;
+            gap: 14px;
+        }
+        .converter-form .form-group {
+            display: grid;
+            gap: 8px;
+        }
+        .converter-form label {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        .converter-form .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            outline: none;
+        }
+        .converter-form .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.16);
+        }
+        .converter-form button {
+            justify-self: start;
+            border: none;
+            padding: 11px 16px;
+            border-radius: 999px;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            font: inherit;
+        }
+        .message {
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            background: #eef2ff;
+            color: var(--secondary);
+        }
+        .message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+        .errorlist {
+            color: #b91c1c;
+            padding-left: 16px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <h1>YouTube to PDF Converter</h1>
+        <p>Create polished PDF study notes from a video or local file.</p>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Dashboard</h2>
+            <ul>
+                <li><a href="/">Overview</a></li>
+                <li><a href="/watch-stats/">Activity</a></li>
+                <li><a href="/attendance/">Attendance</a></li>
+                <li class="active"><a href="/converter/">YouTube to PDF</a></li>
+            </ul>
+        </aside>
+
+        <main class="main">
+            <section class="card converter-card">
+                <div class="converter-banner">
+                    <h2>Turn a video into a PDF study pack</h2>
+                    <p>Paste a YouTube link or choose a local video file, set the screenshot interval, and download a PDF instantly.</p>
+                </div>
+
+                {% if error_message %}
+                    <div class="message error">{{ error_message }}</div>
+                {% endif %}
+
+                <form method="post" class="converter-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ form.video_url.label_tag }}
+                        {{ form.video_url }}
+                        {{ form.video_url.errors }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.local_video_path.label_tag }}
+                        {{ form.local_video_path }}
+                        {{ form.local_video_path.errors }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.interval.label_tag }}
+                        {{ form.interval }}
+                        {{ form.interval.errors }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.min_uniqueness.label_tag }}
+                        {{ form.min_uniqueness }}
+                        {{ form.min_uniqueness.errors }}
+                    </div>
+                    <button type="submit">Generate PDF</button>
+                </form>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

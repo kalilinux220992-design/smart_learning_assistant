@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Video Watch Tracker",
+  "version": "1.0.5",
+  "description": "Tracks watched videos across YouTube and other sites and sends category-based watch time to your Django app.",
+  "permissions": ["tabs", "activeTab", "storage", "scripting", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*", "*://youtube.com/*"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Video Watch Tracker",
+    "default_popup": "popup.html"
+  }
+}

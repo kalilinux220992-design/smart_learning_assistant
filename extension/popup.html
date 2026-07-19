@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Watch Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; min-width: 260px; padding: 12px; }
+    button { width: 100%; padding: 8px; margin-top: 8px; }
+    select { width: 100%; padding: 8px; margin-top: 8px; }
+    .small { font-size: 0.9rem; color: #555; }
+  </style>
+</head>
+<body>
+  <h3>Video Watch Tracker</h3>
+  <p class="small">Choose the category for the current page and the extension will track that activity.</p>
+  <label for="category">Category</label>
+  <div id="status" class="small">Loading current selection…</div>
+  <select id="category">
+    <option value="coding">Coding</option>
+    <option value="lectures">Lectures</option>
+    <option value="news">News</option>
+    <option value="entertainment">Entertainment</option>
+    <option value="other">Other</option>
+  </select>
+  <button id="save">Save selection</button>
+  <button id="refresh">Refresh Status</button>
+  <script src="popup.js"></script>
+</body>
+</html>

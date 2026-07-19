@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Time Dashboard</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header class="topbar">
+        <h1>Watch Time Dashboard</h1>
+        <p>Video engagement categorized by your browser activity</p>
+    </header>
+
+    <main class="main">
+        <section class="hero">
+            <div>
+                <h2>Today’s activity</h2>
+                <p>Tracked for <strong>{{ date }}</strong></p>
+                <p>Total time watched today: <strong>{{ total_minutes }} Minutes</strong></p>
+                <p id="activity-insight" class="muted">Select a category to view its tracked time.</p>
+                <form class="clear-records-form" method="post" action="{% url 'clear_today_watch_stats' %}" onsubmit="return confirm('Clear all watch-time records for today? This cannot be undone.');">
+                    {% csrf_token %}
+                    <button class="danger-button" type="submit">Clear today’s records</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="activity-overview" aria-labelledby="activity-overview-title">
+            <div class="activity-overview-heading">
+                <div>
+                    <p class="eyebrow">Daily breakdown</p>
+                    <h3 id="activity-overview-title">Activity by category</h3>
+                </div>
+                <p class="chart-scale">Each bar is measured against 500 minutes.</p>
+            </div>
+            <div class="activity-chart" aria-label="Category chart in minutes">
+                {% for stat in category_stats %}
+                <button class="bar-item activity-control" type="button" data-category="{{ stat.name }}" data-minutes="{{ stat.minutes }}" aria-label="{{ stat.name|title }}: {{ stat.minutes }} minutes">
+                    <div class="bar-track">
+                        <div class="bar-fill" style="height: {{ stat.bar_height }}%;"></div>
+                    </div>
+                    <span>{{ stat.name|title }}</span>
+                    <small>{{ stat.minutes }} min</small>
+                </button>
+                {% endfor %}
+            </div>
+            <div class="category-summary-grid">
+                {% for stat in category_stats %}
+                <button class="category-summary activity-control" type="button" data-category="{{ stat.name }}" data-minutes="{{ stat.minutes }}">
+                    <span class="category-dot category-dot-{{ stat.name }}"></span>
+                    <span class="category-summary-name">{{ stat.name|title }}</span>
+                    <strong>{{ stat.minutes }} min</strong>
+                </button>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+    <script>
+        const controls = document.querySelectorAll('.activity-control');
+        const insight = document.getElementById('activity-insight');
+
+        controls.forEach((control) => {
+            control.addEventListener('click', () => {
+                const category = control.dataset.category;
+                const minutes = control.dataset.minutes;
+                controls.forEach((item) => item.classList.toggle('is-selected', item.dataset.category === category));
+                insight.textContent = `${category[0].toUpperCase() + category.slice(1)}: ${minutes} minutes tracked today.`;
+            });
+        });
+    </script>
+</body>
+</html>

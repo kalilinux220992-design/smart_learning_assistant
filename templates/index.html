@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Learning Assistant</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header class="topbar" id="topbar">
+        <h1>Smart Learning Assistant</h1>
+        <p>Personalized learning guidance for every student</p>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Dashboard</h2>
+            <ul>
+                <li class="active"><a href="/">Overview</a></li>
+                <li><a href="/watch-stats/">Activity</a></li>
+                <li><a href="/attendance/">Attendance</a></li>
+                <li><a href="/converter/">YouTube to PDF</a></li>
+                <li><a href="/placement/">Placement Predictor</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#insights">Insights</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </aside>
+
+        <main class="main">
+            <section class="hero">
+                <div>
+                    <h2>Learn smarter with AI-powered support</h2>
+                    <p>Track progress, identify gaps, and receive tailored recommendations that keep students motivated and on course.</p>
+                    <a class="btn" href="#features">Explore Features</a>
+                </div>
+                <div class="hero-card">
+                    <h3>Weekly To-Do Progress</h3>
+                    <div class="progress-ring" id="weekly-progress">0%</div>
+                    <p id="weekly-summary">This week's completed to-do work.</p>
+                </div>
+            </section>
+
+            <section class="cards" id="features">
+                <div class="card">
+                    <h3>Adaptive Study Plans</h3>
+                    <p>Create personalized learning paths based on goals, pace, and performance.</p>
+                </div>
+                <div class="card">
+                    <h3>Skill Gap Analysis</h3>
+                    <p>Spot weak areas early and focus on high-impact topics with confidence.</p>
+                </div>
+                <div class="card">
+                    <h3>Daily Motivation</h3>
+                    <p>Stay inspired with reminders, streaks, and practical next-step suggestions.</p>
+                </div>
+                <div class="card">
+                    <h3>Performance Insights</h3>
+                    <p>Review growth trends and measure improvement over time with clear summaries.</p>
+                </div>
+            </section>
+
+            <section class="external-links-section" aria-labelledby="external-links-title">
+                <div class="section-heading">
+                    <p class="eyebrow">Practice resources</p>
+                    <h2 id="external-links-title">Coding platforms</h2>
+                </div>
+                <div class="external-links-grid">
+                    <a class="external-link-card" href="https://leetcode.com/" target="_blank" rel="noopener noreferrer">
+                        <h3>LeetCode</h3>
+                        <p>Practice problem solving, algorithms, and interview preparation.</p>
+                    </a>
+                    <a class="external-link-card" href="https://www.hackerrank.com/" target="_blank" rel="noopener noreferrer">
+                        <h3>HackerRank</h3>
+                        <p>Sharpen your coding skills with hands-on challenges and contests.</p>
+                    </a>
+                </div>
+            </section>
+
+            <section class="dashboard-charts" aria-labelledby="dashboard-charts-title">
+                <div class="section-heading">
+                    <p class="eyebrow">At a glance</p>
+                    <h2 id="dashboard-charts-title">Today’s progress</h2>
+                </div>
+                <div class="pie-chart-grid">
+                    <article class="pie-card">
+                        <div>
+                            <h3>Watch activity</h3>
+                            <p class="muted">Time tracked by activity category today.</p>
+                        </div>
+                        <div class="pie-chart-layout">
+                            <div id="watch-pie-chart" class="pie-chart" role="img" aria-label="Watch activity breakdown">
+                                <span id="watch-pie-total">0 min</span>
+                            </div>
+                            <div id="watch-pie-legend" class="pie-legend"></div>
+                        </div>
+                    </article>
+                    <article class="pie-card">
+                        <div>
+                            <h3>Attendance</h3>
+                            <p class="muted">Classes attended versus classes missed.</p>
+                        </div>
+                        <div class="pie-chart-layout">
+                            <div id="attendance-pie-chart" class="pie-chart" role="img" aria-label="Attendance breakdown">
+                                <span id="attendance-pie-total">0%</span>
+                            </div>
+                            <div id="attendance-pie-legend" class="pie-legend"></div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="analytics-grid" id="insights">
+                <div class="panel" id="learning-focus-panel">
+                    <h3>Learning Focus</h3>
+                    <div class="learning-focus-form">
+                        <label>
+                            New subject
+                            <input id="new-subject" type="text" placeholder="Enter subject name" />
+                        </label>
+                        <button id="add-subject" type="button" class="btn">Add subject</button>
+                    </div>
+                    <div id="subject-list" class="subject-list"></div>
+                    <div class="progress-overview">
+                        <h4>Topic coverage</h4>
+                        <div id="progress-bars" class="progress-bars"></div>
+                    </div>
+                </div>
+                <div class="panel" id="todo-panel">
+                    <h3>To-Do List</h3>
+                    <div class="learning-focus-form">
+                        <label>
+                            New task
+                            <input id="new-task" type="text" placeholder="Enter work to do" />
+                        </label>
+                        <button id="add-task" type="button" class="btn">Add task</button>
+                    </div>
+                    <div id="todo-list" class="subject-list"></div>
+                    <div class="progress-overview">
+                        <h4>Today's To-Do Progress</h4>
+                        <div class="progress-track" role="progressbar" aria-label="Today's to-do progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                            <div id="daily-progress-fill" class="progress-fill" style="width: 0%">0%</div>
+                        </div>
+                        <p id="daily-progress-summary" class="muted">0 of 0 tasks completed today.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <section class="get-in-touch" id="contact">
+        <div class="get-in-touch-content">
+            <h2>Get in Touch</h2>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <h3>Contact</h3>
+                    <p><strong>Email:</strong> <a href="mailto:surendraratre@gmail.com">surendraratre@gmail.com</a></p>
+                    <p><strong>Phone:</strong> <a href="tel:+919876543210">+91 97701 61964</a></p>
+                </div>
+                <div class="contact-item">
+                    <h3>Location</h3>
+                    <p>Online Learning Hub</p>
+                    <p>GEC Bilaspur</p>
+                </div>
+                <div class="contact-item">
+                    <h3>Support</h3>
+                    <p>24x7 guidance</p>
+                    <p>Always available</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <nav class="footer-nav">
+                <a href="/">Home</a>
+                <a href="/watch-stats/">Activity</a>
+                <a href="/attendance/">Attendance</a>
+                <a href="/converter/">YouTube to PDF</a>
+                <a href="/placement/">Placement Predictor</a>
+                <a href="#features">Features</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <div class="footer-branding">
+                <img src="{% static 'logo.png' %}" alt="Smart Learning Assistant logo" class="footer-logo">
+                <p class="footer-copy">© 2026 Smart Learning Assistant</p>
+            </div>
+        </div>
+    </footer>
+    {{ watch_categories|json_script:"watch-categories-data" }}
+    <script>
+        const SUBJECT_STORAGE_KEY = 'learningFocusSubjects';
+        const TODO_STORAGE_KEY = 'learningFocusTodos';
+        const TODO_HISTORY_STORAGE_KEY = 'learningFocusTodoHistory';
+
+        function getTodayKey() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function getSavedSubjects() {
+            try {
+                return JSON.parse(localStorage.getItem(SUBJECT_STORAGE_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveSubjects(subjects) {
+            localStorage.setItem(SUBJECT_STORAGE_KEY, JSON.stringify(subjects));
+        }
+
+        function getTodoHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(TODO_HISTORY_STORAGE_KEY)) || {};
+            } catch {
+                return {};
+            }
+        }
+
+        function saveTodoHistory(history) {
+            localStorage.setItem(TODO_HISTORY_STORAGE_KEY, JSON.stringify(history));
+        }
+
+        function archiveTodoDay(saved) {
+            if (!saved || !saved.date || !Array.isArray(saved.todos) || saved.date === getTodayKey()) return;
+            const history = getTodoHistory();
+            history[saved.date] = {
+                total: saved.todos.length,
+                done: saved.todos.filter((todo) => todo.done).length,
+            };
+            saveTodoHistory(history);
+        }
+
+        function getSavedTodos() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(TODO_STORAGE_KEY));
+                if (saved && saved.date === getTodayKey() && Array.isArray(saved.todos)) {
+                    return saved.todos;
+                }
+                archiveTodoDay(saved);
+            } catch {
+                // Invalid or legacy data is replaced with a fresh daily list.
+            }
+            saveTodos([]);
+            return [];
+        }
+
+        function renderPieChart(chartId, totalId, legendId, values, colors, totalLabel) {
+            const chart = document.getElementById(chartId);
+            const total = document.getElementById(totalId);
+            const legend = document.getElementById(legendId);
+            const entries = Object.entries(values).filter(([, value]) => Number(value) > 0);
+            legend.innerHTML = '';
+
+            if (!entries.length) {
+                chart.style.background = 'conic-gradient(#e5e7eb 0 100%)';
+                total.textContent = totalLabel(0, 0);
+                const empty = document.createElement('p');
+                empty.className = 'muted';
+                empty.textContent = 'No data yet';
+                legend.appendChild(empty);
+                return;
+            }
+
+            const sum = entries.reduce((totalValue, [, value]) => totalValue + Number(value), 0);
+            let cursor = 0;
+            const segments = entries.map(([name, value], index) => {
+                const end = cursor + (Number(value) / sum) * 100;
+                const color = colors[name] || ['#64748b', '#0ea5e9', '#8b5cf6'][index % 3];
+                const segment = `${color} ${cursor}% ${end}%`;
+                const item = document.createElement('div');
+                item.className = 'pie-legend-item';
+                const dot = document.createElement('span');
+                dot.className = 'pie-legend-dot';
+                dot.style.background = color;
+                const label = document.createElement('span');
+                label.textContent = name;
+                const amount = document.createElement('strong');
+                amount.textContent = totalLabel(Number(value), sum, true);
+                item.append(dot, label, amount);
+                legend.appendChild(item);
+                cursor = end;
+                return segment;
+            });
+            chart.style.background = `conic-gradient(${segments.join(', ')})`;
+            total.textContent = totalLabel(sum, sum);
+        }
+
+        function renderDashboardCharts() {
+            const watchCategories = JSON.parse(document.getElementById('watch-categories-data').textContent);
+            renderPieChart(
+                'watch-pie-chart', 'watch-pie-total', 'watch-pie-legend', watchCategories,
+                { coding: '#06b6d4', lectures: '#4f46e5', news: '#f59e0b', entertainment: '#ec4899', other: '#64748b' },
+                (value, total, isLegend) => isLegend ? `${Math.round(value / 60)} min` : `${Math.round(value / 60)} min`,
+            );
+
+            const records = JSON.parse(localStorage.getItem('attendanceRecords') || '{}');
+            let held = 0;
+            let attended = 0;
+            Object.values(records).forEach((day) => {
+                if (Object.hasOwn(day, 'held')) {
+                    held += day.held || 0;
+                    attended += day.attended || 0;
+                } else {
+                    Object.values(day).forEach((record) => {
+                        held += record.held || 0;
+                        attended += record.attended || 0;
+                    });
+                }
+            });
+            const missed = Math.max(0, held - attended);
+            renderPieChart(
+                'attendance-pie-chart', 'attendance-pie-total', 'attendance-pie-legend',
+                { Attended: attended, Missed: missed }, { Attended: '#22c55e', Missed: '#f97316' },
+                (value, total, isLegend) => isLegend ? `${value} classes` : `${total ? Math.round((attended / total) * 100) : 0}%`,
+            );
+        }
+
+        function saveTodos(todos) {
+            localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify({ date: getTodayKey(), todos }));
+        }
+
+        function createTopicItem(subjectIndex, topicIndex, topic) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'topic-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = topic.covered;
+            checkbox.addEventListener('change', () => {
+                const subjects = getSavedSubjects();
+                subjects[subjectIndex].topics[topicIndex].covered = checkbox.checked;
+                saveSubjects(subjects);
+                renderAll();
+            });
+
+            const label = document.createElement('label');
+            label.textContent = topic.name;
+            label.prepend(checkbox);
+
+            const remove = document.createElement('button');
+            remove.textContent = 'Remove';
+            remove.className = 'small-button';
+            remove.addEventListener('click', () => {
+                const subjects = getSavedSubjects();
+                subjects[subjectIndex].topics.splice(topicIndex, 1);
+                saveSubjects(subjects);
+                renderAll();
+            });
+
+            wrapper.append(label, remove);
+            return wrapper;
+        }
+
+        function createSubjectCard(subject, subjectIndex) {
+            const card = document.createElement('details');
+            card.className = 'subject-card';
+
+            const header = document.createElement('summary');
+            header.className = 'subject-header';
+            const title = document.createElement('h4');
+            title.textContent = subject.name;
+            const hint = document.createElement('span');
+            hint.className = 'subject-toggle-hint';
+            hint.textContent = 'Show topics';
+            header.append(title, hint);
+
+            const content = document.createElement('div');
+            content.className = 'subject-content';
+            const removeSubject = document.createElement('button');
+            removeSubject.textContent = 'Delete subject';
+            removeSubject.className = 'small-button';
+            removeSubject.addEventListener('click', () => {
+                const subjects = getSavedSubjects();
+                subjects.splice(subjectIndex, 1);
+                saveSubjects(subjects);
+                renderAll();
+            });
+
+            const topicForm = document.createElement('div');
+            topicForm.className = 'topic-form';
+            const topicInput = document.createElement('input');
+            topicInput.type = 'text';
+            topicInput.placeholder = 'Add topic to cover';
+            const topicButton = document.createElement('button');
+            topicButton.textContent = 'Add topic';
+            topicButton.className = 'btn btn-small';
+            topicButton.addEventListener('click', () => {
+                const name = topicInput.value.trim();
+                if (!name) return;
+                const subjects = getSavedSubjects();
+                subjects[subjectIndex].topics.push({ name, covered: false });
+                saveSubjects(subjects);
+                topicInput.value = '';
+                renderAll();
+            });
+            topicForm.append(topicInput, topicButton);
+
+            const topicList = document.createElement('div');
+            topicList.className = 'topic-list';
+            if (subject.topics.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'small muted';
+                empty.textContent = 'No topics yet. Add one to start tracking.';
+                topicList.append(empty);
+            } else {
+                subject.topics.forEach((topic, topicIndex) => {
+                    topicList.append(createTopicItem(subjectIndex, topicIndex, topic));
+                });
+            }
+
+            content.append(removeSubject, topicForm, topicList);
+            card.append(header, content);
+            return card;
+        }
+
+        function renderProgressBars(subjects) {
+            const progressBars = document.getElementById('progress-bars');
+            progressBars.innerHTML = '';
+            if (subjects.length === 0) {
+                progressBars.textContent = 'Add subjects and topics to see progress.';
+                return;
+            }
+
+            subjects.forEach((subject) => {
+                const total = subject.topics.length;
+                const covered = subject.topics.filter((topic) => topic.covered).length;
+                const percent = total === 0 ? 0 : Math.round((covered / total) * 100);
+
+                const row = document.createElement('div');
+                row.className = 'progress-row';
+                const label = document.createElement('div');
+                label.className = 'progress-label';
+                label.textContent = `${subject.name} — ${covered}/${total} topics covered`;
+                const track = document.createElement('div');
+                track.className = 'progress-track';
+                const fill = document.createElement('div');
+                fill.className = 'progress-fill';
+                fill.style.width = percent + '%';
+                fill.textContent = percent + '%';
+                track.appendChild(fill);
+                row.append(label, track);
+                progressBars.append(row);
+            });
+        }
+
+        function createTodoItem(todoIndex, todo) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'topic-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.done;
+            checkbox.addEventListener('change', () => {
+                const todos = getSavedTodos();
+                todos[todoIndex].done = checkbox.checked;
+                saveTodos(todos);
+                renderAll();
+            });
+
+            const label = document.createElement('label');
+            label.textContent = todo.name;
+            label.prepend(checkbox);
+
+            const remove = document.createElement('button');
+            remove.textContent = 'Remove';
+            remove.className = 'small-button';
+            remove.addEventListener('click', () => {
+                const todos = getSavedTodos();
+                todos.splice(todoIndex, 1);
+                saveTodos(todos);
+                renderAll();
+            });
+
+            wrapper.append(label, remove);
+            return wrapper;
+        }
+
+        function renderTodos() {
+            const todoList = document.getElementById('todo-list');
+            const todos = getSavedTodos();
+            todoList.innerHTML = '';
+            if (todos.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'small muted';
+                empty.textContent = 'Add tasks for today.';
+                todoList.append(empty);
+                return;
+            }
+
+            todos.forEach((todo, todoIndex) => {
+                todoList.append(createTodoItem(todoIndex, todo));
+            });
+        }
+
+        function getTodoProgress(todos) {
+            if (todos.length === 0) return 0;
+            const doneCount = todos.filter((task) => task.done).length;
+            return Math.round((doneCount / todos.length) * 100);
+        }
+
+        function updateWeeklyProgress() {
+            const todos = getSavedTodos();
+            const history = getTodoHistory();
+            const today = new Date();
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+            weekStart.setHours(0, 0, 0, 0);
+            let weeklyTotal = 0;
+            let weeklyDone = 0;
+
+            for (let offset = 0; offset < 7; offset += 1) {
+                const date = new Date(weekStart);
+                date.setDate(weekStart.getDate() + offset);
+                if (date > today) break;
+                const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                const record = dateKey === getTodayKey()
+                    ? { total: todos.length, done: todos.filter((todo) => todo.done).length }
+                    : history[dateKey];
+                if (record) {
+                    weeklyTotal += record.total;
+                    weeklyDone += record.done;
+                }
+            }
+
+            const weeklyPercent = weeklyTotal === 0 ? 0 : Math.round((weeklyDone / weeklyTotal) * 100);
+            const ring = document.getElementById('weekly-progress');
+            ring.textContent = `${weeklyPercent}%`;
+            ring.style.background = `conic-gradient(var(--primary) ${weeklyPercent}%, #e5e7eb 0)`;
+            document.getElementById('weekly-summary').textContent = `${weeklyDone} of ${weeklyTotal} to-do tasks completed this week.`;
+
+            const dailyDone = todos.filter((todo) => todo.done).length;
+            const dailyPercent = getTodoProgress(todos);
+            const dailyFill = document.getElementById('daily-progress-fill');
+            dailyFill.style.width = `${dailyPercent}%`;
+            dailyFill.textContent = `${dailyPercent}%`;
+            dailyFill.parentElement.setAttribute('aria-valuenow', dailyPercent);
+            document.getElementById('daily-progress-summary').textContent = `${dailyDone} of ${todos.length} tasks completed today.`;
+        }
+
+        function renderSubjects() {
+            const subjectList = document.getElementById('subject-list');
+            const subjects = getSavedSubjects();
+            subjectList.innerHTML = '';
+            subjects.forEach((subject, index) => {
+                subjectList.append(createSubjectCard(subject, index));
+            });
+            renderProgressBars(subjects);
+        }
+
+        function renderAll() {
+            renderSubjects();
+            renderTodos();
+            updateWeeklyProgress();
+        }
+
+        function scheduleDailyTodoReset() {
+            const now = new Date();
+            const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            window.setTimeout(() => {
+                archiveTodoDay(JSON.parse(localStorage.getItem(TODO_STORAGE_KEY)));
+                saveTodos([]);
+                renderAll();
+                scheduleDailyTodoReset();
+            }, nextMidnight - now);
+        }
+
+        document.getElementById('add-subject').addEventListener('click', () => {
+            const input = document.getElementById('new-subject');
+            const name = input.value.trim();
+            if (!name) return;
+            const subjects = getSavedSubjects();
+            subjects.push({ name, topics: [] });
+            saveSubjects(subjects);
+            input.value = '';
+            renderAll();
+        });
+
+        document.getElementById('add-task').addEventListener('click', () => {
+            const input = document.getElementById('new-task');
+            const name = input.value.trim();
+            if (!name) return;
+            const todos = getSavedTodos();
+            todos.push({ name, done: false });
+            saveTodos(todos);
+            input.value = '';
+            renderAll();
+        });
+
+        renderAll();
+        scheduleDailyTodoReset();
+        renderDashboardCharts();
+    </script>
+</body>
+</html>

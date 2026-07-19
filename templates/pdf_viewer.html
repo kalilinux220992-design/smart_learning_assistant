@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Workspace</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        .pdf-shell { display: grid; grid-template-columns: 320px 1fr; gap: 20px; padding: 24px; }
+        .pdf-sidebar { background: var(--panel); border-radius: 16px; padding: 18px; box-shadow: 0 8px 24px rgba(15,23,42,0.08); }
+        .pdf-content { background: var(--panel); border-radius: 16px; padding: 18px; box-shadow: 0 8px 24px rgba(15,23,42,0.08); min-height: 70vh; }
+        .pdf-breadcrumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; color: var(--secondary); font-size: 0.92rem; }
+        .pdf-breadcrumbs a { color: var(--primary); text-decoration: none; }
+        .pdf-entry-list { display: grid; gap: 8px; margin-top: 12px; }
+        .pdf-entry { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 10px; background: #f8faff; }
+        .pdf-entry a { color: var(--secondary); text-decoration: none; font-weight: 600; }
+        .pdf-entry .pill { font-size: 0.75rem; color: var(--primary); }
+        .tool-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+        .tool-button { border: 1px solid var(--border); background: #eef2ff; color: var(--secondary); padding: 8px 12px; border-radius: 999px; cursor: pointer; }
+        .tool-button.active { background: var(--primary); color: white; }
+        .pdf-canvas-wrap { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: #f8faff; }
+        .pdf-canvas { width: 100%; min-height: 60vh; border: 1px solid var(--border); border-radius: 10px; background: white; position: relative; overflow: hidden; }
+        .pdf-canvas canvas { width: 100%; height: 100%; display: block; }
+        .annotation-layer { position: absolute; inset: 0; }
+        .note { position: absolute; padding: 6px 8px; background: rgba(250,204,21,0.85); color: #422006; border-radius: 6px; font-size: 0.82rem; max-width: 180px; }
+        .note.selected { outline: 2px solid var(--primary); }
+        .empty-state { padding: 18px; color: var(--muted); }
+        @media (max-width: 960px) { .pdf-shell { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <h1>PDF Workspace</h1>
+        <p>Browse your folders, open PDFs inline, and add highlights or notes.</p>
+    </header>
+
+    <div class="pdf-shell">
+        <aside class="pdf-sidebar">
+            <h3>Folder browser</h3>
+            <p class="muted">Choose a root folder first, then browse inside it and open PDFs here.</p>
+            <div class="pdf-entry-list" style="margin-bottom: 12px;">
+                <div class="pdf-entry">
+                    <a href="?root={{ pdf_root|urlencode }}">Open root folder</a>
+                    <span class="pill">Root</span>
+                </div>
+            </div>
+            <div class="pdf-breadcrumbs">
+                {% for crumb in breadcrumbs %}
+                    <span>/</span>
+                    {% if forloop.last %}
+                        <strong>{{ crumb.name }}</strong>
+                    {% else %}
+                        <a href="?root={{ root_dir|urlencode }}&path={{ crumb.path|urlencode }}">{{ crumb.name }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="pdf-entry-list">
+                {% if entries or pdf_files %}
+                    {% for entry in entries %}
+                        <div class="pdf-entry">
+                            <a href="?root={{ root_dir|urlencode }}&path={{ entry.path|urlencode }}">
+                                {% if entry.name == '..' %}⬆️ Parent folder{% else %}{{ entry.name }}{% endif %}
+                            </a>
+                            <span class="pill">Folder</span>
+                        </div>
+                    {% endfor %}
+                    {% for pdf in pdf_files %}
+                        <div class="pdf-entry">
+                            <a href="?root={{ root_dir|urlencode }}&path={{ current_dir|urlencode }}&file={{ pdf.path|urlencode }}">{{ pdf.name }}</a>
+                            <span class="pill">PDF</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">No files found in this folder.</div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <main class="pdf-content">
+            <div class="tool-bar">
+                <button class="tool-button active" data-tool="highlight">Highlight</button>
+                <button class="tool-button" data-tool="note">Add note</button>
+                <button class="tool-button" id="clear-annotations">Clear</button>
+            </div>
+            {% if pdf_url %}
+                <div class="pdf-canvas-wrap">
+                    <div class="pdf-canvas" id="pdf-canvas">
+                        <iframe id="pdf-frame" src="{{ pdf_url }}" title="PDF viewer" style="width: 100%; height: 70vh; border: none;"></iframe>
+                        <div class="annotation-layer" id="annotation-layer"></div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state">Select a PDF file from the left panel to view it here.</div>
+            {% endif %}
+        </main>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('pdf-canvas');
+        const frame = document.getElementById('pdf-frame');
+        const layer = document.getElementById('annotation-layer');
+        const buttons = Array.from(document.querySelectorAll('.tool-button'));
+        let activeTool = 'highlight';
+        const annotations = [];
+
+        function setTool(tool) {
+            activeTool = tool;
+            buttons.forEach((button) => button.classList.toggle('active', button.dataset.tool === tool));
+        }
+
+        function createAnnotation(x, y) {
+            if (!frame) return;
+            const note = document.createElement('div');
+            note.className = 'note';
+            note.style.left = `${x}px`;
+            note.style.top = `${y}px`;
+            note.textContent = activeTool === 'note' ? 'New note' : 'Highlighted';
+            note.addEventListener('click', () => {
+                document.querySelectorAll('.note').forEach((item) => item.classList.remove('selected'));
+                note.classList.add('selected');
+            });
+            layer.appendChild(note);
+            annotations.push(note);
+        }
+
+        canvas?.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            if (activeTool === 'highlight') {
+                createAnnotation(x, y);
+            } else if (activeTool === 'note') {
+                createAnnotation(x, y);
+            }
+        });
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => setTool(button.dataset.tool));
+        });
+
+        document.getElementById('clear-annotations')?.addEventListener('click', () => {
+            annotations.forEach((annotation) => annotation.remove());
+            annotations.length = 0;
+        });
+
+        setTool(activeTool);
+    </script>
+</body>
+</html>

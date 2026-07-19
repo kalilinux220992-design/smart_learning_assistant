@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Monitor</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header class="topbar">
+        <h1>Attendance Monitor</h1>
+        <p>Track class attendance by date and review your attendance history.</p>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Attendance</h2>
+            <ul>
+                <li><a href="/">Overview</a></li>
+                <li><a href="/watch-stats/">Activity</a></li>
+                <li class="active"><a href="/attendance/">Attendance</a></li>
+                <li><a href="#calendar">Calendar</a></li>
+            </ul>
+        </aside>
+
+        <main class="main">
+            <section class="hero">
+                <div>
+                    <h2>Attendance tracker</h2>
+                    <p>Add your subjects, select a date, and log classes held and attended for each subject.</p>
+                </div>
+            </section>
+
+            <section class="card attendance-subjects-panel">
+                <div>
+                    <p class="eyebrow">Your subjects</p>
+                    <h3>Manage subjects</h3>
+                </div>
+                <div class="subject-add-form">
+                    <input id="new-attendance-subject" type="text" placeholder="For example: Mathematics" />
+                    <button id="add-attendance-subject" type="button" class="btn">Add subject</button>
+                </div>
+                <div id="attendance-subject-list" class="attendance-subject-list"></div>
+            </section>
+
+            <section class="cards" id="calendar">
+                <div class="card attendance-card">
+                    <h3 id="calendar-title">Month Calendar</h3>
+                    <div class="calendar-nav">
+                        <button id="prev-month" type="button" class="small-button">←</button>
+                        <span id="month-label"></span>
+                        <button id="next-month" type="button" class="small-button">→</button>
+                    </div>
+                    <div id="calendar-grid" class="calendar-grid"></div>
+                </div>
+                <div class="card attendance-entry-card">
+                    <h3>Daily Attendance</h3>
+                    <p id="selected-date">Select a date from the calendar</p>
+                    <div class="learning-focus-form">
+                        <label>
+                            Subject
+                            <select id="attendance-subject"></select>
+                        </label>
+                        <label>
+                            Classes held
+                            <input id="classes-held" type="number" min="0" value="0" />
+                        </label>
+                        <label>
+                            Classes attended
+                            <input id="classes-attended" type="number" min="0" value="0" />
+                        </label>
+                        <button id="save-attendance" type="button" class="btn">Save attendance</button>
+                    </div>
+                    <div class="attendance-summary">
+                        <h4>Attendance summary</h4>
+                        <p>Total days recorded: <strong id="days-recorded">0</strong></p>
+                        <p>Total classes held: <strong id="total-held">0</strong></p>
+                        <p>Total classes attended: <strong id="total-attended">0</strong></p>
+                        <p>Attendance percentage: <strong id="attendance-percentage">0%</strong></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card attendance-graph-panel">
+                <div class="activity-overview-heading">
+                    <div>
+                        <p class="eyebrow">Subject overview</p>
+                        <h3>Attendance by subject</h3>
+                    </div>
+                    <p class="chart-scale">Each bar shows attended classes out of classes held.</p>
+                </div>
+                <div id="attendance-graphs" class="attendance-graphs"></div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <nav class="footer-nav">
+                <a href="/">Home</a>
+                <a href="/watch-stats/">Activity</a>
+                <a href="/attendance/">Attendance</a>
+            </nav>
+            <p class="footer-copy">© 2026 Smart Learning Assistant</p>
+        </div>
+    </footer>
+
+    <script>
+        const ATTENDANCE_KEY = 'attendanceRecords';
+        const ATTENDANCE_SUBJECTS_KEY = 'attendanceSubjects';
+        let selectedDate = null;
+        let selectedSubjectId = null;
+        let currentDate = new Date();
+
+        function getAttendanceRecords() {
+            try { return JSON.parse(localStorage.getItem(ATTENDANCE_KEY)) || {}; }
+            catch { return {}; }
+        }
+
+        function saveAttendanceRecords(records) {
+            localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(records));
+        }
+
+        function getAttendanceSubjects() {
+            try { return JSON.parse(localStorage.getItem(ATTENDANCE_SUBJECTS_KEY)) || []; }
+            catch { return []; }
+        }
+
+        function saveAttendanceSubjects(subjects) {
+            localStorage.setItem(ATTENDANCE_SUBJECTS_KEY, JSON.stringify(subjects));
+        }
+
+        function formatDate(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function migrateLegacyRecords() {
+            const records = getAttendanceRecords();
+            const hasLegacyRecords = Object.values(records).some((record) => record && Object.hasOwn(record, 'held'));
+            if (!hasLegacyRecords) return;
+            const subjects = getAttendanceSubjects();
+            const legacySubject = { id: 'general', name: 'General' };
+            if (!subjects.some((subject) => subject.id === legacySubject.id)) {
+                saveAttendanceSubjects([...subjects, legacySubject]);
+            }
+            Object.keys(records).forEach((dateKey) => {
+                if (Object.hasOwn(records[dateKey], 'held')) {
+                    records[dateKey] = { general: records[dateKey] };
+                }
+            });
+            saveAttendanceRecords(records);
+        }
+
+        function createCalendarGrid() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            document.getElementById('month-label').textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((label) => {
+                const header = document.createElement('div');
+                header.className = 'calendar-cell calendar-header';
+                header.textContent = label;
+                grid.appendChild(header);
+            });
+
+            const startingDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const records = getAttendanceRecords();
+            for (let i = 0; i < startingDay; i += 1) {
+                const spacer = document.createElement('div');
+                spacer.className = 'calendar-cell calendar-spacer';
+                grid.appendChild(spacer);
+            }
+            for (let day = 1; day <= daysInMonth; day += 1) {
+                const dateKey = formatDate(new Date(year, month, day));
+                const cell = document.createElement('button');
+                cell.type = 'button';
+                cell.className = 'calendar-cell calendar-day';
+                cell.textContent = day;
+                if (records[dateKey] && Object.keys(records[dateKey]).length) cell.classList.add('calendar-recorded');
+                if (dateKey === selectedDate) cell.classList.add('calendar-selected');
+                cell.addEventListener('click', () => {
+                    selectedDate = dateKey;
+                    createCalendarGrid();
+                    loadAttendance();
+                });
+                grid.appendChild(cell);
+            }
+        }
+
+        function renderSubjectControls() {
+            const subjects = getAttendanceSubjects();
+            const list = document.getElementById('attendance-subject-list');
+            const select = document.getElementById('attendance-subject');
+            list.innerHTML = '';
+            select.innerHTML = '';
+
+            if (!subjects.length) {
+                const empty = document.createElement('p');
+                empty.className = 'muted';
+                empty.textContent = 'Add a subject to begin marking attendance.';
+                list.appendChild(empty);
+                select.disabled = true;
+                document.getElementById('save-attendance').disabled = true;
+                return;
+            }
+            if (!subjects.some((subject) => subject.id === selectedSubjectId)) selectedSubjectId = subjects[0].id;
+            subjects.forEach((subject) => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = subject.name;
+                option.selected = subject.id === selectedSubjectId;
+                select.appendChild(option);
+
+                const chip = document.createElement('div');
+                chip.className = 'attendance-subject-chip';
+                const name = document.createElement('span');
+                name.textContent = subject.name;
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'small-button';
+                remove.textContent = 'Remove';
+                remove.addEventListener('click', () => removeAttendanceSubject(subject.id));
+                chip.append(name, remove);
+                list.appendChild(chip);
+            });
+            select.disabled = false;
+            document.getElementById('save-attendance').disabled = false;
+        }
+
+        function loadAttendance() {
+            const records = getAttendanceRecords();
+            const record = selectedDate && selectedSubjectId ? records[selectedDate]?.[selectedSubjectId] || { held: 0, attended: 0 } : { held: 0, attended: 0 };
+            document.getElementById('selected-date').textContent = selectedDate ? `Attendance for ${selectedDate}` : 'Select a date from the calendar';
+            document.getElementById('classes-held').value = record.held;
+            document.getElementById('classes-attended').value = record.attended;
+        }
+
+        function updateAttendanceSummary() {
+            const records = getAttendanceRecords();
+            const dateKeys = Object.keys(records);
+            let totalHeld = 0;
+            let totalAttended = 0;
+            dateKeys.forEach((dateKey) => Object.values(records[dateKey]).forEach((record) => {
+                totalHeld += record.held || 0;
+                totalAttended += record.attended || 0;
+            }));
+            const percentage = totalHeld ? Math.round((totalAttended / totalHeld) * 100) : 0;
+            document.getElementById('days-recorded').textContent = dateKeys.length;
+            document.getElementById('total-held').textContent = totalHeld;
+            document.getElementById('total-attended').textContent = totalAttended;
+            document.getElementById('attendance-percentage').textContent = `${percentage}%`;
+        }
+
+        function renderAttendanceGraphs() {
+            const graphContainer = document.getElementById('attendance-graphs');
+            const records = getAttendanceRecords();
+            graphContainer.innerHTML = '';
+            getAttendanceSubjects().forEach((subject) => {
+                let held = 0;
+                let attended = 0;
+                Object.values(records).forEach((day) => {
+                    const record = day[subject.id];
+                    if (record) { held += record.held || 0; attended += record.attended || 0; }
+                });
+                const percentage = held ? Math.round((attended / held) * 100) : 0;
+                const card = document.createElement('div');
+                card.className = 'attendance-graph-card';
+                const title = document.createElement('h4');
+                title.textContent = subject.name;
+                const label = document.createElement('p');
+                label.textContent = `${attended} of ${held} classes attended`;
+                const track = document.createElement('div');
+                track.className = 'progress-track';
+                const fill = document.createElement('div');
+                fill.className = 'progress-fill';
+                fill.style.width = `${percentage}%`;
+                fill.textContent = `${percentage}%`;
+                track.appendChild(fill);
+                card.append(title, label, track);
+                graphContainer.appendChild(card);
+            });
+            if (!graphContainer.children.length) graphContainer.textContent = 'Add subjects to view attendance graphs.';
+        }
+
+        function removeAttendanceSubject(subjectId) {
+            saveAttendanceSubjects(getAttendanceSubjects().filter((subject) => subject.id !== subjectId));
+            const records = getAttendanceRecords();
+            Object.keys(records).forEach((dateKey) => {
+                delete records[dateKey][subjectId];
+                if (!Object.keys(records[dateKey]).length) delete records[dateKey];
+            });
+            saveAttendanceRecords(records);
+            renderAll();
+        }
+
+        function renderAll() {
+            renderSubjectControls();
+            createCalendarGrid();
+            loadAttendance();
+            updateAttendanceSummary();
+            renderAttendanceGraphs();
+        }
+
+        document.getElementById('add-attendance-subject').addEventListener('click', () => {
+            const input = document.getElementById('new-attendance-subject');
+            const name = input.value.trim();
+            if (!name) return;
+            const subjects = getAttendanceSubjects();
+            if (subjects.some((subject) => subject.name.toLowerCase() === name.toLowerCase())) return;
+            const subject = { id: `subject-${Date.now()}`, name };
+            saveAttendanceSubjects([...subjects, subject]);
+            selectedSubjectId = subject.id;
+            input.value = '';
+            renderAll();
+        });
+
+        document.getElementById('attendance-subject').addEventListener('change', (event) => {
+            selectedSubjectId = event.target.value;
+            loadAttendance();
+        });
+
+        document.getElementById('save-attendance').addEventListener('click', () => {
+            if (!selectedDate || !selectedSubjectId) return;
+            const held = Math.max(0, parseInt(document.getElementById('classes-held').value, 10) || 0);
+            const attended = Math.min(held, Math.max(0, parseInt(document.getElementById('classes-attended').value, 10) || 0));
+            const records = getAttendanceRecords();
+            records[selectedDate] = records[selectedDate] || {};
+            records[selectedDate][selectedSubjectId] = { held, attended };
+            saveAttendanceRecords(records);
+            renderAll();
+        });
+
+        document.getElementById('prev-month').addEventListener('click', () => { currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1); createCalendarGrid(); });
+        document.getElementById('next-month').addEventListener('click', () => { currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1); createCalendarGrid(); });
+
+        migrateLegacyRecords();
+        renderAll();
+    </script>
+</body>
+</html>

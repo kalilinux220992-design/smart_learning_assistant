@@ -1,0 +1,40 @@
+{
+  "2026-07-16": {
+    "total_seconds": 8778,
+    "categories": {
+      "other": 6069,
+      "lectures": 1173,
+      "news": 347,
+      "entertainment": 1189
+    }
+  },
+  "2026-07-17": {
+    "total_seconds": 30224,
+    "categories": {
+      "entertainment": 25538,
+      "other": 75,
+      "news": 327,
+      "lectures": 4284
+    }
+  },
+  "2026-07-18": {
+    "total_seconds": 23131,
+    "categories": {
+      "other": 15997,
+      "coding": 1639,
+      "entertainment": 3442,
+      "lectures": 30,
+      "news": 2023
+    }
+  },
+  "2026-07-19": {
+    "total_seconds": 28466,
+    "categories": {
+      "entertainment": 1879,
+      "other": 17657,
+      "coding": 8541,
+      "lectures": 30,
+      "news": 359
+    }
+  }
+}

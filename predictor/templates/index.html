@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Predictor</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header class="topbar" id="topbar">
+<!--    <button id="toggleSidebar" aria-label="Toggle sidebar">☰</button>-->
+    <h1>Placement Predictor</h1>
+</header>
+<div class="container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <h2>Predictor</h2>
+        <ul>
+            <li class="active"><a href="{% url 'predictor:home' %}">Dashboard</a></li>
+            <li><a href="{% url 'predictor:students' %}">Students</a></li>
+            <li><a href="{% url 'predictor:companies' %}">Companies</a></li>
+            <li><a href="{% url 'predictor:predict' %}">Predict Placement</a></li>
+            <li><a href="{% url 'predictor:algorithms' %}">Algorithms</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <h1>Dashboard</h1>
+
+        <div class="cards">
+            <div class="card">Total Students<br><b>29</b></div>
+            <div class="card">Placement Rate<br><b>25%</b></div>
+            <div class="card">Avg Package<br><b>4 LPA</b></div>
+            <div class="card">Avg CGPA<br><b>6.0</b></div>
+        </div>
+
+        <div class="chart-wrapper">
+            <div class="chart-box">
+                <h3>CGPA Distribution</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3>Placement Risk</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+
+        <div class="analytics-grid" id="analytics">
+            <section class="panel">
+                <h3>Top Hiring Companies</h3>
+                <div class="company-table-wrap">
+                    <table class="company-table">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Hired</th>
+                                <th>Avg Package</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>TCS</td><td>9</td><td>3.2 LPA</td></tr>
+                            <tr><td>Infosys</td><td>0</td><td>6.5 LPA</td></tr>
+                            <tr><td>Cognizant</td><td>0</td><td>8.5 LPA</td></tr>
+                            <tr><td>Wipro</td><td>0</td><td>6.5 LPA</td></tr>
+                            <tr><td>Tech Mahindra</td><td>2</td><td>3.6 LPA</td></tr>
+                            <tr><td>Global Quest</td><td>1</td><td>3.0 LPA</td></tr>
+                            <tr><td>Nsight Inc.</td><td>5</td><td>3.6 LPA</td></tr>
+                            <tr><td>Teachnook Edutech</td><td>3</td><td>5 LPA</td></tr>
+                            <tr><td>Knocial India Limited</td><td>9</td><td>5 LPA</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="panel">
+                <h3>Critical Skill Gaps</h3>
+                <ul class="skill-list">
+                    <li><div><strong>SQL</strong><small>60% have this</small></div><div class="skill-bar" style="--fill:60%"></div></li>
+                    <li><div><strong>Python</strong><small>70% have this</small></div><div class="skill-bar" style="--fill:70%"></div></li>
+                    <li><div><strong>Data Structures</strong><small>70% have this</small></div><div class="skill-bar" style="--fill:70%"></div></li>
+                    <li><div><strong>JavaScript</strong><small>30% have this</small></div><div class="skill-bar" style="--fill:30%"></div></li>
+                    <li><div><strong>Machine Learning</strong><small>30% have this</small></div><div class="skill-bar" style="--fill:30%"></div></li>
+                    <li><div><strong>Java</strong><small>30% have this</small></div><div class="skill-bar" style="--fill:30%"></div></li>
+                    <li><div><strong>React</strong><small>20% have this</small></div><div class="skill-bar" style="--fill:20%"></div></li>
+                    <li><div><strong>Node.js</strong><small>20% have this</small></div><div class="skill-bar" style="--fill:20%"></div></li>
+                    <li><div><strong>AWS</strong><small>20% have this</small></div><div class="skill-bar" style="--fill:20%"></div></li>
+                    <li><div><strong>Docker</strong><small>50% have this</small></div><div class="skill-bar" style="--fill:50%"></div></li>
+                    <li><div><strong>Git</strong><small>40% have this</small></div><div class="skill-bar" style="--fill:40%"></div></li>
+                    <li><div><strong>TypeScript</strong><small>30% have this</small></div><div class="skill-bar" style="--fill:30%"></div></li>
+                    <li><div><strong>C++</strong><small>80% have this</small></div><div class="skill-bar" style="--fill:80%"></div></li>
+                    <li><div><strong>System Design</strong><small>20% have this</small></div><div class="skill-bar" style="--fill:20%"></div></li>
+                    <li><div><strong>Rest APIs</strong><small>20% have this</small></div><div class="skill-bar" style="--fill:20%"></div></li>
+                </ul>
+            </section>
+        </div>
+
+    </main>
+</div>
+
+<!-- Get in Touch Section -->
+<section class="get-in-touch" id="get-in-touch">
+    <div class="get-in-touch-content">
+        <h2>Get in Touch With Us</h2>
+        
+        <div class="contact-grid">
+            <div class="contact-item">
+                <h3>Contact</h3>
+                <p><strong>Email:</strong> <a href="mailto:surendraratre@gmail.com">surendraratre@gmail.com</a></p>
+                <p><strong>Phone:</strong> <a href="tel:9770161964">9770161964</a></p>
+            </div>
+            
+            <div class="contact-item">
+                <h3>Location</h3>
+                <p>GEC Bilaspur</p>
+                <p>C.G, India</p>
+            </div>
+            
+            <div class="contact-item">
+                <h3>Open Hours</h3>
+                <p><strong>Online</strong></p>
+                <p>24x7</p>
+            </div>
+        </div>
+        
+        <!-- <div class="team-grid">
+            <div class="team-member">
+                <h3>Frontend</h3>
+                <p><strong>Email:</strong> <a href="mailto:surendraratte@gmail.com">surendraratte@gmail.com</a></p>
+                <p><strong>Name:</strong> Surendra</p>
+            </div>
+            
+            <div class="team-member">
+                <h3>Backend</h3>
+                <p><strong>Email:</strong> <a href="mailto:surendraratte@gmail.com">surendraratte@gmail.com</a></p>
+                <p><strong>Name:</strong> Surendra</p>
+            </div>
+        </div> -->
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="site-footer">
+    <div class="footer-inner">
+        <nav class="footer-nav">
+            <a href="{% url 'predictor:home' %}">Home</a>
+            <a href="#topbar">About</a>
+            <a href="#get-in-touch">Contacts</a>
+            <a href="{% url 'predictor:algorithms' %}">Algorithms</a>
+        </nav>
+        <div class="footer-branding">
+            <img src="{% static 'logo.png' %}" alt="Footer logo" class="footer-logo">
+            <p class="footer-copy">© All Rights Reserved. Placement Predictor</p>
+        </div>
+    </div>
+</footer>
+
+<script src="{% static 'script.js' %}"></script>
+</body>
+</html>
